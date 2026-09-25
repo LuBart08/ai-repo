@@ -8,11 +8,12 @@ apt repository + download page for **[Artificially Inteligent](https://github.co
 
 | File | Purpose |
 |---|---|
-| `index.html` | Human-facing download page (this site) |
+| `index.html` | Download page — plain HTML, no CSS, no JavaScript |
+| `styled.html` | Same page with styling (static alternative, kept as-is) |
 | `Packages` / `Packages.gz` | apt package index (flat repo layout) |
 | `Release` | Repo metadata read by package managers |
 | `debs/*.deb` | The packages |
-| `build.py` | Regenerates `Packages`, `Packages.gz`, `Release` and `index.html` |
+| `build.py` | Regenerates `Packages`, `Packages.gz`, `Release`, `index.html`, `README.md` |
 
 ## Adding as a source
 

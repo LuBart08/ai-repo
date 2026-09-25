@@ -1,5 +1,13 @@
 #!/usr/bin/env python3
-"""Generate an apt (Cydia/Sileo/Zebra) repository + download page for the .deb."""
+"""Generate an apt (Cydia/Sileo/Zebra) repository + plain-HTML download page.
+
+Outputs (all in this directory):
+  Packages, Packages.gz, Release   -> apt index for Sileo / Zebra / Cydia
+  index.html                       -> plain HTML page (no CSS, no JavaScript)
+  README.md                        -> repo documentation
+
+`styled.html` is a static alternative page kept in git; it is not touched here.
+"""
 import datetime
 import gzip
 import hashlib
@@ -10,8 +18,8 @@ REPO_DIR = os.path.expanduser("~/build/ai-repo")
 DEB_NAME = "com.rg.artificiallyinteligient_1.0.0-3+debug_iphoneos-arm.deb"
 DEB_PATH = os.path.join(REPO_DIR, "debs", DEB_NAME)
 PAGES_URL = "https://lubart08.github.io/ai-repo/"
-GITHUB_REPO = "https://github.com/LuBart08/ai-repo"
 PROJECT_REPO = "https://github.com/LuBart08/ArtificiallyInteligent"
+UPSTREAM_REPO = "https://github.com/ivanisgoodatcoding52/ArtificiallyInteligent"
 RELEASE_URL = "https://github.com/LuBart08/ArtificiallyInteligent/releases/tag/v1.0.0-3%2Bdebug"
 
 with open(DEB_PATH, "rb") as f:
@@ -21,14 +29,15 @@ size = len(blob)
 md5 = hashlib.md5(blob).hexdigest()
 sha1 = hashlib.sha1(blob).hexdigest()
 sha256 = hashlib.sha256(blob).hexdigest()
+e = html.escape
 
-# metadata taken from `dpkg-deb -f`, with the fork owner as maintainer
-# (upstream control still has the "Your Name" / example.com placeholders)
 DESC = ("A lightweight AI chatbot client for legacy jailbroken iOS devices (iOS 4.0+). "
         "Includes a SpringBoard long-press overlay, a Settings.app pane, and a standalone "
         "app (with a artificiallyinteligent:// URL scheme and a cross-tweak "
         "Darwin-notification API for other tweaks to call into). Connect to "
         "OpenAI-compatible APIs, Ollama, VoidAI, or custom providers.")
+
+# ---- Packages / Packages.gz -------------------------------------------------
 ENTRY = f"""Package: com.rg.artificiallyinteligient
 Name: Artificially Inteligent
 Version: 1.0.0-3+debug
@@ -46,8 +55,6 @@ SHA1: {sha1}
 SHA256: {sha256}
 Description: {DESC}
 """
-
-# ---- Packages / Packages.gz -------------------------------------------------
 with open(os.path.join(REPO_DIR, "Packages"), "w") as f:
     f.write(ENTRY)
 with open(os.path.join(REPO_DIR, "Packages.gz"), "wb") as f:
@@ -56,7 +63,8 @@ with open(os.path.join(REPO_DIR, "Packages.gz"), "wb") as f:
 
 # ---- Release ----------------------------------------------------------------
 now = datetime.datetime.now(datetime.timezone.utc).strftime("%a, %d %b %Y %H:%M:%S +0000")
-release = f"""Origin: Artificially Inteligent
+with open(os.path.join(REPO_DIR, "Release"), "w") as f:
+    f.write(f"""Origin: Artificially Inteligent
 Label: Artificially Inteligent
 Suite: stable
 Codename: stable
@@ -65,134 +73,105 @@ Architectures: iphoneos-arm
 Components: main
 Description: AI chatbot client for jailbroken iOS 4.0+ — apt repository
 Homepage: {PROJECT_REPO}
-"""
-with open(os.path.join(REPO_DIR, "Release"), "w") as f:
-    f.write(release)
+""")
 
-# ---- index.html -------------------------------------------------------------
-def card(title, body):
-    return f'<div class="card"><h2>{title}</h2>{body}</div>'
-
-
-download_card = card("Download", f"""
-  <a class="btn" href="debs/{html.escape(DEB_NAME)}">⬇ Download .deb</a>
-  <p class="meta">{size:,} bytes &middot; <code>iphoneos-arm</code> &middot; v1.0.0-3+debug</p>
-  <p class="meta">Also on the
-    <a href="{RELEASE_URL}">GitHub release page</a>.</p>""")
-
-add_card = card("Add this repo to your package manager", f"""
-  <p>Sileo, Zebra and Cydia all understand this repository:</p>
-  <div class="copyrow">
-    <code id="repourl">{PAGES_URL}</code>
-    <button onclick="navigator.clipboard.writeText('{PAGES_URL}');this.textContent='Copied ✓'">Copy</button>
-  </div>
-  <p class="meta">Settings → <em>Add Source</em> → paste the URL above. The package appears
-  under <strong>Tweaks</strong> as <em>Artificially Inteligent</em>.</p>""")
-
-install_card = card("Or install over SSH", f"""
-  <pre><code>curl -LO {PAGES_URL}debs/{html.escape(DEB_NAME)}
-dpkg -i {html.escape(DEB_NAME)}
-sbreload   <span class="cmt"># or: killall -9 SpringBoard</span></code></pre>""")
-
-deps_card = card("Details", f"""
-  <table>
-    <tr><th>Package</th><td><code>com.rg.artificiallyinteligient</code></td></tr>
-    <tr><th>Version</th><td><code>1.0.0-3+debug</code></td></tr>
-    <tr><th>Architecture</th><td><code>iphoneos-arm</code> (armv7 tier)</td></tr>
-    <tr><th>Minimum iOS</th><td>4.0</td></tr>
-    <tr><th>Depends</th><td><code>mobilesubstrate | com.saurik.substrate.safemode</code>,
-        <code>firmware (&ge; 4.0)</code>, <code>preferenceloader</code></td></tr>
-    <tr><th>Installed size</th><td>468 KiB</td></tr>
-    <tr><th>MD5</th><td><code class="hash">{md5}</code></td></tr>
-    <tr><th>SHA256</th><td><code class="hash">{sha256}</code></td></tr>
-  </table>""")
-
-links_card = card("Links", f"""
-  <ul class="links">
-    <li><a href="{PROJECT_REPO}">Source code (fork)</a> — README, build tiers, bridge API</li>
-    <li><a href="https://github.com/ivanisgoodatcoding52/ArtificiallyInteligent">Upstream repository</a></li>
-    <li><a href="{PAGES_URL}Packages">Packages index</a> &middot;
-        <a href="{PAGES_URL}Packages.gz">Packages.gz</a> &middot;
-        <a href="{PAGES_URL}Release">Release</a></li>
-  </ul>""")
-
+# ---- index.html (plain HTML: no CSS, no JavaScript) -------------------------
 page = f"""<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="apt repository and download page for Artificially Inteligent, an AI chatbot client for jailbroken iOS 4.0+.">
 <title>Artificially Inteligent — repo</title>
-<meta name="description" content="apt repository for Artificially Inteligent, an AI chatbot client for jailbroken iOS 4.0+.">
-<style>
-  :root {{
-    --bg: #0d1117; --panel: #161b22; --border: #30363d;
-    --fg: #e6edf3; --muted: #8b949e; --accent: #58a6ff; --green: #3fb950;
-  }}
-  * {{ box-sizing: border-box; }}
-  body {{
-    margin: 0; background: var(--bg); color: var(--fg);
-    font: 16px/1.6 -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
-  }}
-  .wrap {{ max-width: 860px; margin: 0 auto; padding: 48px 20px 80px; }}
-  h1 {{ font-size: 2rem; margin: 0 0 4px; }}
-  h2 {{ font-size: 1.05rem; margin: 0 0 14px; color: var(--accent); text-transform: uppercase; letter-spacing: .05em; }}
-  .tagline {{ color: var(--muted); margin: 0 0 28px; }}
-  .badges {{ margin-bottom: 28px; }}
-  .card {{
-    background: var(--panel); border: 1px solid var(--border);
-    border-radius: 10px; padding: 20px 22px; margin-bottom: 16px;
-  }}
-  a {{ color: var(--accent); text-decoration: none; }}
-  a:hover {{ text-decoration: underline; }}
-  code {{
-    background: #0b0f14; border: 1px solid var(--border); border-radius: 5px;
-    padding: 1px 6px; font: 13px/1.5 ui-monospace, SFMono-Regular, Menlo, monospace;
-  }}
-  pre {{ background: #0b0f14; border: 1px solid var(--border); border-radius: 8px;
-        padding: 14px; overflow-x: auto; }}
-  pre code {{ background: none; border: 0; padding: 0; }}
-  .cmt {{ color: var(--muted); }}
-  .btn {{
-    display: inline-block; background: var(--green); color: #04150a; font-weight: 600;
-    padding: 11px 22px; border-radius: 8px; font-size: 1rem;
-  }}
-  .btn:hover {{ text-decoration: none; filter: brightness(1.1); }}
-  .meta {{ color: var(--muted); font-size: .9rem; }}
-  .copyrow {{ display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin: 10px 0; }}
-  .copyrow code {{ flex: 1 1 320px; padding: 9px 12px; font-size: .95rem; }}
-  .copyrow button {{
-    background: #21262d; color: var(--fg); border: 1px solid var(--border);
-    border-radius: 7px; padding: 9px 16px; cursor: pointer; font-size: .9rem;
-  }}
-  .copyrow button:hover {{ background: #30363d; }}
-  table {{ width: 100%; border-collapse: collapse; font-size: .93rem; }}
-  th, td {{ text-align: left; padding: 7px 8px; border-bottom: 1px solid var(--border); vertical-align: top; }}
-  th {{ color: var(--muted); font-weight: 600; width: 160px; }}
-  tr:last-child th, tr:last-child td {{ border-bottom: 0; }}
-  .hash {{ word-break: break-all; }}
-  .links {{ margin: 0; padding-left: 18px; }}
-  .links li {{ margin: 6px 0; }}
-  footer {{ color: var(--muted); font-size: .85rem; margin-top: 30px; text-align: center; }}
-</style>
 </head>
 <body>
-<div class="wrap">
-  <h1>Artificially Inteligent</h1>
-  <p class="tagline">A lightweight AI chatbot client for legacy jailbroken iOS devices (iOS 4.0+) —
-     SpringBoard overlay, Settings pane, standalone app.</p>
-  <p class="badges">
-    <img alt="version" src="https://img.shields.io/badge/version-1.0.0--3%2Bdebug-blue">
-    <img alt="ios" src="https://img.shields.io/badge/iOS-4.0%2B-lightgrey">
-    <img alt="arch" src="https://img.shields.io/badge/arch-iphoneos--arm-orange">
-    <img alt="license" src="https://img.shields.io/badge/license-MIT-green">
-  </p>
-  {download_card}
-  {add_card}
-  {install_card}
-  {deps_card}
-  {links_card}
-  <footer>MIT licensed &middot; built with Theos &middot; served by GitHub Pages</footer>
-</div>
+
+<h1>Artificially Inteligent</h1>
+
+<p>
+A lightweight AI chatbot client for legacy jailbroken iOS devices (iOS 4.0+).
+SpringBoard overlay, Settings pane and standalone app &mdash; all native
+Objective-C, no web views.
+</p>
+
+<p>
+Version <b>1.0.0-3+debug</b> &middot;
+Architecture <b>iphoneos-arm</b> (armv7) &middot;
+Minimum iOS <b>4.0</b> &middot;
+Licence <b>MIT</b>
+</p>
+
+<hr>
+
+<h2>Download</h2>
+
+<p>
+<a href="debs/{e(DEB_NAME)}">{e(DEB_NAME)}</a>
+({size:,} bytes)
+</p>
+
+<p>
+The same file is attached to the
+<a href="{RELEASE_URL}">GitHub release</a>.
+</p>
+
+<h2>Add this repository to your package manager</h2>
+
+<p>Works with Sileo, Zebra and Cydia:</p>
+
+<pre>{PAGES_URL}</pre>
+
+<p>
+Settings &rarr; <i>Add Source</i> &rarr; paste the URL above.
+The package then appears under <b>Tweaks</b> as <b>Artificially Inteligent</b>.
+</p>
+
+<h2>Or install over SSH</h2>
+
+<pre>curl -LO {PAGES_URL}debs/{e(DEB_NAME)}
+dpkg -i {e(DEB_NAME)}
+sbreload</pre>
+
+<h2>Package details</h2>
+
+<table border="1" cellpadding="6" cellspacing="0">
+<tr><th align="left">Package</th><td><code>com.rg.artificiallyinteligient</code></td></tr>
+<tr><th align="left">Version</th><td><code>1.0.0-3+debug</code></td></tr>
+<tr><th align="left">Architecture</th><td><code>iphoneos-arm</code> (armv7 tier)</td></tr>
+<tr><th align="left">Minimum iOS</th><td>4.0</td></tr>
+<tr><th align="left">Installed size</th><td>468 KiB</td></tr>
+<tr><th align="left">Download size</th><td>{size:,} bytes</td></tr>
+<tr><th align="left">Depends</th><td><code>mobilesubstrate | com.saurik.substrate.safemode</code>,
+<code>firmware (&gt;= 4.0)</code>, <code>preferenceloader</code></td></tr>
+<tr><th align="left">MD5</th><td><code>{md5}</code></td></tr>
+<tr><th align="left">SHA1</th><td><code>{sha1}</code></td></tr>
+<tr><th align="left">SHA256</th><td><code>{sha256}</code></td></tr>
+</table>
+
+<h2>Repository files</h2>
+
+<ul>
+<li><a href="Packages">Packages</a> &mdash; apt package index</li>
+<li><a href="Packages.gz">Packages.gz</a> &mdash; gzipped index (what package managers fetch)</li>
+<li><a href="Release">Release</a> &mdash; repository metadata</li>
+<li><a href="debs/">debs/</a> &mdash; the packages themselves</li>
+<li><a href="styled.html">styled.html</a> &mdash; same page, with styling</li>
+</ul>
+
+<h2>Links</h2>
+
+<ul>
+<li><a href="{PROJECT_REPO}">Source code (fork)</a> &mdash; README, build tiers, cross-tweak bridge API</li>
+<li><a href="{UPSTREAM_REPO}">Upstream repository</a></li>
+<li><a href="https://github.com/LuBart08/ai-repo">This repository (ai-repo)</a></li>
+</ul>
+
+<hr>
+
+<p>
+MIT licensed &middot; built with Theos &middot; served by GitHub Pages
+</p>
+
 </body>
 </html>
 """
@@ -200,7 +179,8 @@ with open(os.path.join(REPO_DIR, "index.html"), "w") as f:
     f.write(page)
 
 # ---- README.md --------------------------------------------------------------
-readme = f"""# ai-repo
+with open(os.path.join(REPO_DIR, "README.md"), "w") as f:
+    f.write(f"""# ai-repo
 
 apt repository + download page for **[Artificially Inteligent]({PROJECT_REPO})**.
 
@@ -210,11 +190,12 @@ apt repository + download page for **[Artificially Inteligent]({PROJECT_REPO})**
 
 | File | Purpose |
 |---|---|
-| `index.html` | Human-facing download page (this site) |
+| `index.html` | Download page — plain HTML, no CSS, no JavaScript |
+| `styled.html` | Same page with styling (static alternative, kept as-is) |
 | `Packages` / `Packages.gz` | apt package index (flat repo layout) |
 | `Release` | Repo metadata read by package managers |
 | `debs/*.deb` | The packages |
-| `build.py` | Regenerates `Packages`, `Packages.gz`, `Release` and `index.html` |
+| `build.py` | Regenerates `Packages`, `Packages.gz`, `Release`, `index.html`, `README.md` |
 
 ## Adding as a source
 
@@ -235,9 +216,7 @@ sbreload
 ```sh
 python3 build.py   # after replacing the .deb in debs/
 ```
-"""
-with open(os.path.join(REPO_DIR, "README.md"), "w") as f:
-    f.write(readme)
+""")
 
 print("size   :", size)
 print("md5    :", md5)
