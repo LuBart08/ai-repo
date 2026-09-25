@@ -89,82 +89,50 @@ page = f"""<!DOCTYPE html>
 <h1>Artificially Inteligent</h1>
 
 <p>
-A lightweight AI chatbot client for legacy jailbroken iOS devices (iOS 4.0+).
-SpringBoard overlay, Settings pane and standalone app &mdash; all native
-Objective-C, no web views.
+AI chatbot client for jailbroken iOS 4.0+ &mdash; SpringBoard overlay,
+Settings pane, standalone app.<br>
+<b>v1.0.0-3+debug</b> &middot; iphoneos-arm (armv7) &middot; iOS 4.0+ &middot; MIT &middot;
+{size:,} bytes
 </p>
 
 <p>
-Version <b>1.0.0-3+debug</b> &middot;
-Architecture <b>iphoneos-arm</b> (armv7) &middot;
-Minimum iOS <b>4.0</b> &middot;
-Licence <b>MIT</b>
-</p>
-
-<hr>
-
-<h2>Download</h2>
-
-<p>
-<a href="debs/{e(DEB_NAME)}">{e(DEB_NAME)}</a>
-({size:,} bytes)
+<a href="cydia://url/{PAGES_URL}"><b>[ + Add to Cydia ]</b></a>
+&nbsp;&nbsp;
+<a href="debs/{e(DEB_NAME)}"><b>[ Download .deb ]</b></a>
+&nbsp;&nbsp;
+<a href="{RELEASE_URL}"><b>[ GitHub release ]</b></a>
 </p>
 
 <p>
-The same file is attached to the
-<a href="{RELEASE_URL}">GitHub release</a>.
+Sileo / Zebra: <i>Settings &rarr; Add Source</i> &rarr;
+<code>{PAGES_URL}</code>
 </p>
 
-<h2>Add this repository to your package manager</h2>
-
-<p>Works with Sileo, Zebra and Cydia:</p>
-
-<pre>{PAGES_URL}</pre>
-
-<p>
-Settings &rarr; <i>Add Source</i> &rarr; paste the URL above.
-The package then appears under <b>Tweaks</b> as <b>Artificially Inteligent</b>.
-</p>
-
-<h2>Or install over SSH</h2>
+<h2>Install over SSH</h2>
 
 <pre>curl -LO {PAGES_URL}debs/{e(DEB_NAME)}
-dpkg -i {e(DEB_NAME)}
-sbreload</pre>
+dpkg -i {e(DEB_NAME)} &amp;&amp; sbreload</pre>
 
-<h2>Package details</h2>
+<h2>Details</h2>
 
-<table border="1" cellpadding="6" cellspacing="0">
+<table border="1" cellpadding="5" cellspacing="0">
 <tr><th align="left">Package</th><td><code>com.rg.artificiallyinteligient</code></td></tr>
-<tr><th align="left">Version</th><td><code>1.0.0-3+debug</code></td></tr>
-<tr><th align="left">Architecture</th><td><code>iphoneos-arm</code> (armv7 tier)</td></tr>
-<tr><th align="left">Minimum iOS</th><td>4.0</td></tr>
-<tr><th align="left">Installed size</th><td>468 KiB</td></tr>
-<tr><th align="left">Download size</th><td>{size:,} bytes</td></tr>
-<tr><th align="left">Depends</th><td><code>mobilesubstrate | com.saurik.substrate.safemode</code>,
-<code>firmware (&gt;= 4.0)</code>, <code>preferenceloader</code></td></tr>
+<tr><th align="left">Version / arch</th><td>1.0.0-3+debug &middot; iphoneos-arm &middot; min iOS 4.0 &middot; {size:,} B / 468 KiB installed</td></tr>
+<tr><th align="left">Depends</th><td><code>mobilesubstrate | com.saurik.substrate.safemode</code>, <code>firmware (&gt;= 4.0)</code>, <code>preferenceloader</code></td></tr>
 <tr><th align="left">MD5</th><td><code>{md5}</code></td></tr>
-<tr><th align="left">SHA1</th><td><code>{sha1}</code></td></tr>
 <tr><th align="left">SHA256</th><td><code>{sha256}</code></td></tr>
 </table>
 
-<h2>Repository files</h2>
-
-<ul>
-<li><a href="Packages">Packages</a> &mdash; apt package index</li>
-<li><a href="Packages.gz">Packages.gz</a> &mdash; gzipped index (what package managers fetch)</li>
-<li><a href="Release">Release</a> &mdash; repository metadata</li>
-<li><a href="debs/">debs/</a> &mdash; the packages themselves</li>
-<li><a href="styled.html">styled.html</a> &mdash; same page, with styling</li>
-</ul>
-
-<h2>Links</h2>
-
-<ul>
-<li><a href="{PROJECT_REPO}">Source code (fork)</a> &mdash; README, build tiers, cross-tweak bridge API</li>
-<li><a href="{UPSTREAM_REPO}">Upstream repository</a></li>
-<li><a href="https://github.com/LuBart08/ai-repo">This repository (ai-repo)</a></li>
-</ul>
+<p>
+<a href="Packages">Packages</a> &middot;
+<a href="Packages.gz">Packages.gz</a> &middot;
+<a href="Release">Release</a> &middot;
+<a href="debs/">debs/</a> &middot;
+<a href="styled.html">styled version</a><br>
+<a href="{PROJECT_REPO}">Source</a> &middot;
+<a href="https://github.com/LuBart08/ai-repo">ai-repo</a> &middot;
+<a href="{UPSTREAM_REPO}">Upstream</a>
+</p>
 
 <hr>
 
