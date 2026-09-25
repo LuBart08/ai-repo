@@ -13,6 +13,7 @@ import gzip
 import hashlib
 import html
 import os
+import urllib.parse
 
 REPO_DIR = os.path.expanduser("~/build/ai-repo")
 DEB_NAME = "com.rg.artificiallyinteligient_1.0.0-3+debug_iphoneos-arm.deb"
@@ -30,6 +31,9 @@ md5 = hashlib.md5(blob).hexdigest()
 sha1 = hashlib.sha1(blob).hexdigest()
 sha256 = hashlib.sha256(blob).hexdigest()
 e = html.escape
+# percent-encoded repo URL — the `?source=` argument must be percent-encoded
+# (Sileo's AppDelegate decodes it with removingPercentEncoding, iOS 55-char gate)
+SRC_ENC = urllib.parse.quote(PAGES_URL, safe="")
 
 DESC = ("A lightweight AI chatbot client for legacy jailbroken iOS devices (iOS 4.0+). "
         "Includes a SpringBoard long-press overlay, a Settings.app pane, and a standalone "
@@ -96,16 +100,18 @@ Settings pane, standalone app.<br>
 </p>
 
 <p>
-<a href="cydia://url/{PAGES_URL}"><b>[ + Add to Cydia ]</b></a>
-&nbsp;&nbsp;
+<a href="cydia://url/?source={SRC_ENC}"><b>[ + Add to Cydia ]</b></a>
+&nbsp;
+<a href="sileo://source/{PAGES_URL}"><b>[ + Add to Sileo ]</b></a>
+&nbsp;
 <a href="debs/{e(DEB_NAME)}"><b>[ Download .deb ]</b></a>
-&nbsp;&nbsp;
+&nbsp;
 <a href="{RELEASE_URL}"><b>[ GitHub release ]</b></a>
 </p>
 
 <p>
-Sileo / Zebra: <i>Settings &rarr; Add Source</i> &rarr;
-<code>{PAGES_URL}</code>
+Or add manually: <i>Settings &rarr; Add Source</i> &rarr;
+<code>{PAGES_URL}</code> (works everywhere, incl. Zebra)
 </p>
 
 <h2>Install over SSH</h2>
@@ -168,6 +174,17 @@ apt repository + download page for **[Artificially Inteligent]({PROJECT_REPO})**
 ## Adding as a source
 
 In **Sileo**, **Zebra** or **Cydia**: *Settings → Add Source* → `{PAGES_URL}`
+
+### One-tap buttons (URL schemes)
+
+| Button | URL | Handled by |
+|---|---|---|
+| `+ Add to Cydia` | `cydia://url/?source=<repo-url, percent-encoded>` | Cydia; **Sileo too** — it registers the `cydia` scheme and decodes `?source=` (see `Sileo/AppDelegate.swift`) |
+| `+ Add to Sileo` | `sileo://source/<repo-url>` | Sileo (`host == "source"` → prefilled Add-Source dialog) |
+
+Zebra declares only `zbra://` and its handler is still a `// TODO` in
+`URLController.swift`, so there is no one-tap path for it — use the manual
+*Add Source* route above.
 
 The package shows up under **Tweaks** as *Artificially Inteligent*.
 

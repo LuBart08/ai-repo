@@ -19,6 +19,17 @@ apt repository + download page for **[Artificially Inteligent](https://github.co
 
 In **Sileo**, **Zebra** or **Cydia**: *Settings → Add Source* → `https://lubart08.github.io/ai-repo/`
 
+### One-tap buttons (URL schemes)
+
+| Button | URL | Handled by |
+|---|---|---|
+| `+ Add to Cydia` | `cydia://url/?source=<repo-url, percent-encoded>` | Cydia; **Sileo too** — it registers the `cydia` scheme and decodes `?source=` (see `Sileo/AppDelegate.swift`) |
+| `+ Add to Sileo` | `sileo://source/<repo-url>` | Sileo (`host == "source"` → prefilled Add-Source dialog) |
+
+Zebra declares only `zbra://` and its handler is still a `// TODO` in
+`URLController.swift`, so there is no one-tap path for it — use the manual
+*Add Source* route above.
+
 The package shows up under **Tweaks** as *Artificially Inteligent*.
 
 ## Direct install (SSH)
