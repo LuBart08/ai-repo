@@ -1,0 +1,16 @@
+Package: com.rg.artificiallyinteligient
+Name: Artificially Inteligent
+Version: 1.0.0-3+debug
+Architecture: iphoneos-arm
+Maintainer: LuBart08 <LuBart08@users.noreply.github.com>
+Author: ivanisgood52
+Section: Tweaks
+Depends: mobilesubstrate | com.saurik.substrate.safemode, firmware (>= 4.0), preferenceloader
+Homepage: https://github.com/LuBart08/ArtificiallyInteligent
+Installed-Size: 468
+Filename: debs/com.rg.artificiallyinteligient_1.0.0-3+debug_iphoneos-arm.deb
+Size: 90452
+MD5sum: 693ddc85847c36a5937ba428503a4cca
+SHA1: 2407d16ce81e991f9ecdba2731b9c713fa10772c
+SHA256: 04e970931d7813f4edfeb92c05d4debc8c00e7cc7a81d0577199cc6c6579cc98
+Description: A lightweight AI chatbot client for legacy jailbroken iOS devices (iOS 4.0+). Includes a SpringBoard long-press overlay, a Settings.app pane, and a standalone app (with a artificiallyinteligent:// URL scheme and a cross-tweak Darwin-notification API for other tweaks to call into). Connect to OpenAI-compatible APIs, Ollama, VoidAI, or custom providers.
